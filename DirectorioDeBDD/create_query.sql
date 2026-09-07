@@ -1,3 +1,8 @@
+-- =============================================
+-- Fecha: 2026-09-07
+-- Descripción: Query para creación de la base de datos y sus tablas
+-- Base de datos: graffiti
+-- =============================================
 use graffiti;
 
 CREATE TABLE categorias (
