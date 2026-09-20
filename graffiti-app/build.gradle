@@ -11,13 +11,13 @@ repositories {
     mavenCentral()
 }
 
-javafx {
-    version = '21.0.6'
-    modules = [ 'javafx.controls', 'javafx.fxml' ]
-}
-
 application {
     mainClass = 'com.graffiti.Main'
+}
+
+javafx {
+    version = "21" // O la versión de JavaFX que coincida con tu JDK
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
 dependencies {
@@ -25,6 +25,13 @@ dependencies {
     testImplementation platform('org.junit:junit-bom:6.0.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// Bloque para pasarle parámetros a la JVM y evitar las advertencias de JavaFX
+run {
+    jvmArgs = [
+            '--add-opens=javafx.graphics/com.sun.javafx.application=ALL-UNNAMED'
+    ]
 }
 
 test {
