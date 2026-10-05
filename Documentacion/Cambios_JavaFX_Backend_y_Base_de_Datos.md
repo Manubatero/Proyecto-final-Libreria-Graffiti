@@ -161,3 +161,8 @@ En esta entrega se avanzó en una primera versión funcional de escritorio para 
 También se ordenó el código para separar las pantallas de los datos y sus operaciones, y se dejó el diagrama actualizado como referencia para continuar el desarrollo. El punto de cobro y algunas vistas están iniciados, pero todavía requieren conectarse con la lógica de venta para completar ese circuito.
 
 En conjunto, estos cambios dejan una base más clara para seguir incorporando funciones y para presentar el sistema como una aplicación de escritorio.
+
+
+## Documentación de arquitectura, módulos y modelo de datos
+
+La arquitectura propuesta, el listado priorizado de módulos, el estado de implementación y la especificación del modelo relacional se encuentran en [Diseño del sistema](Diseno_Arquitectura_Modulos_Modelo.md). El script consolidado para instalaciones nuevas es [create_query.sql](../DirectorioDeBDD/create_query.sql).
