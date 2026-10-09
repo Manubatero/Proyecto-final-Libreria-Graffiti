@@ -162,6 +162,14 @@ También se ordenó el código para separar las pantallas de los datos y sus ope
 
 En conjunto, estos cambios dejan una base más clara para seguir incorporando funciones y para presentar el sistema como una aplicación de escritorio.
 
+---
+
+## Anexo: ajuste de los tiempos de desarrollo del lector de códigos de barras
+
+Durante la planificación se modificaron los tiempos previstos para implementar la tecnología de lectura de códigos de barras. El ajuste se debió a un imprevisto en la curva de aprendizaje de la tecnología seleccionada, que requirió más tiempo del estimado para comprender su funcionamiento y evaluar su integración con el punto de venta.
+
+Por este motivo, la incorporación del lector se reprogramó para contar con tiempo suficiente de aprendizaje, adaptación y verificación, sin afectar el desarrollo de las demás funciones previstas.
+
 
 ## Documentación de arquitectura, módulos y modelo de datos
 
