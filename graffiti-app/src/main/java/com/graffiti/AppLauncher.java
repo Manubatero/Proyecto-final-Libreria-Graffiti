@@ -1,6 +1,7 @@
 package com.graffiti;
 
 import com.graffiti.view.InventarioTab;
+import com.graffiti.view.PuntoDeVentaView;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.TabPane;
@@ -16,6 +17,7 @@ public class AppLauncher extends Application {
             // Carga la pestaña del CRUD de Inventario
             InventarioTab inventarioTab = new InventarioTab();
             tabPane.getTabs().add(inventarioTab);
+            tabPane.getTabs().add(new PuntoDeVentaView());
 
             Scene scene = new Scene(tabPane, 1000, 600);
             primaryStage.setTitle("Sistema Graffiti - Gestión de Stock");
