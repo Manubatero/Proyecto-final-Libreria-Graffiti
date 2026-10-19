@@ -14,7 +14,7 @@ public class PuntoDeVentaTab extends Tab {
 
     private void initUI() {
         Label title = new Label("PUNTO DE COBRO\nEscanee códigos de barras con la pistola lectora USB.");
-        title.setStyle("-fx-font-size:18px;-fx-font-weight:bold;-fx-text-fill:#172554;");
+        title.setStyle("-fx-font-size:18px;-fx-font-weight:bold;-fx-text-fill:#e2e8f0;");
 
         TextField lector = new TextField();
         lector.setPromptText("Escanee el código de barras aquí...");
@@ -24,7 +24,7 @@ public class PuntoDeVentaTab extends Tab {
         tablaVenta.setPlaceholder(new Label("No hay productos en el carrito actual."));
 
         Label total = new Label("TOTAL: $ 0.00");
-        total.setStyle("-fx-font-size:24px;-fx-font-weight:bold;-fx-text-fill:#172554;");
+        total.setStyle("-fx-font-size:24px;-fx-font-weight:bold;-fx-text-fill:#e2e8f0;");
 
         Button btnCobrar = new Button("Cobrar e Imprimir");
         btnCobrar.setStyle("-fx-background-color:#0f766e;-fx-text-fill:white;-fx-font-weight:bold;-fx-font-size:14px;-fx-padding:10 20;");

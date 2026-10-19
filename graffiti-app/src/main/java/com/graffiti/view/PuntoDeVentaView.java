@@ -15,7 +15,7 @@ public class PuntoDeVentaView extends Tab {
 
         BorderPane contenido = new BorderPane();
         contenido.setPadding(new Insets(22));
-        contenido.setStyle("-fx-background-color:#f1f5f9;");
+        contenido.setStyle("-fx-background-color:#182230;");
         contenido.setTop(crearEncabezado());
         contenido.setCenter(crearAreaVenta());
         BorderPane.setMargin(contenido.getCenter(), new Insets(18, 0, 0, 0));
@@ -24,9 +24,9 @@ public class PuntoDeVentaView extends Tab {
 
     private VBox crearEncabezado() {
         Label titulo = new Label("Punto de venta");
-        titulo.setStyle("-fx-font-size:24px;-fx-font-weight:bold;-fx-text-fill:#172554;");
+        titulo.setStyle("-fx-font-size:24px;-fx-font-weight:bold;-fx-text-fill:#f1f5f9;");
         Label ayuda = new Label("Escanee el código de barras o busque un producto para iniciar la venta.");
-        ayuda.setStyle("-fx-font-size:13px;-fx-text-fill:#64748b;");
+        ayuda.setStyle("-fx-font-size:13px;-fx-text-fill:#94a3b8;");
         return new VBox(5, titulo, ayuda);
     }
 
@@ -51,7 +51,7 @@ public class PuntoDeVentaView extends Tab {
         HBox.setHgrow(busqueda, Priority.ALWAYS);
 
         Label tituloCarrito = new Label("Detalle de la venta");
-        tituloCarrito.setStyle("-fx-font-size:16px;-fx-font-weight:bold;-fx-text-fill:#172554;");
+        tituloCarrito.setStyle("-fx-font-size:16px;-fx-font-weight:bold;-fx-text-fill:#e2e8f0;");
         TableView<FilaCarrito> tabla = crearTablaCarrito();
         VBox.setVgrow(tabla, Priority.ALWAYS);
 
@@ -89,7 +89,7 @@ public class PuntoDeVentaView extends Tab {
     }
 
     static String estiloTarjeta() {
-        return "-fx-background-color:white;-fx-background-radius:10;-fx-border-color:#e2e8f0;-fx-border-radius:10;";
+        return "-fx-background-color:#172131;-fx-background-radius:10;-fx-border-color:#334155;-fx-border-radius:10;";
     }
 
     private static class FilaCarrito {

@@ -42,7 +42,7 @@ public class InventarioTab extends Tab {
 
     private void initUI() {
         Label title = new Label("ADMINISTRACIÓN DE PRODUCTOS");
-        title.setStyle("-fx-font-size:16px;-fx-font-weight:bold;-fx-text-fill:#172554;");
+        title.setStyle("-fx-font-size:16px;-fx-font-weight:bold;-fx-text-fill:#e2e8f0;");
 
         // Configuración de Tabla
         tabla = new TableView<>(listaProductos);
@@ -76,7 +76,7 @@ public class InventarioTab extends Tab {
                     setStyle("");
                 } else if (item.getStockActual() != null && item.getStockMinimo() != null
                         && item.getStockActual() <= item.getStockMinimo()) {
-                    setStyle("-fx-background-color: #f8d7da; -fx-text-fill: #721c24; -fx-font-weight: bold;");
+                    setStyle("-fx-background-color: #7f1d1d; -fx-text-fill: #ffffff; -fx-font-weight: bold;");
                 } else {
                     setStyle("");
                 }
@@ -103,6 +103,10 @@ public class InventarioTab extends Tab {
 
         // Formulario Lateral
         VBox formulario = crearFormulario();
+        ScrollPane formularioDesplazable = new ScrollPane(formulario);
+        formularioDesplazable.setFitToWidth(true);
+        formularioDesplazable.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        formularioDesplazable.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
         Button btnRefrescar = new Button("🔄 Refrescar Listado");
         btnRefrescar.setOnAction(e -> cargarProductos());
@@ -111,7 +115,7 @@ public class InventarioTab extends Tab {
         contenedorIzquierdo.setPadding(new Insets(15));
         VBox.setVgrow(tabla, Priority.ALWAYS);
 
-        SplitPane split = new SplitPane(contenedorIzquierdo, formulario);
+        SplitPane split = new SplitPane(contenedorIzquierdo, formularioDesplazable);
         split.setDividerPositions(0.68);
 
         this.setContent(split);
@@ -119,7 +123,7 @@ public class InventarioTab extends Tab {
 
     private VBox crearFormulario() {
         Label tituloForm = new Label("Formulario de Producto");
-        tituloForm.setStyle("-fx-font-size:14px;-fx-font-weight:bold;-fx-text-fill:#172554;");
+        tituloForm.setStyle("-fx-font-size:14px;-fx-font-weight:bold;-fx-text-fill:#e2e8f0;");
 
         txtCodigo = new TextField(); txtCodigo.setPromptText("Código de barras");
         txtNombre = new TextField(); txtNombre.setPromptText("Nombre del producto");
