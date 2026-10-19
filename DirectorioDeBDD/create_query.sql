@@ -18,6 +18,12 @@ CREATE TABLE categorias (
     CONSTRAINT uq_categoria_nombre UNIQUE (nombre)
 ) ENGINE=InnoDB;
 
+-- Categoria de respaldo para productos que se creen sin una categoria elegida.
+-- El ID se genera automaticamente como cualquier otra categoria.
+INSERT INTO categorias (nombre, descripcion)
+VALUES ('Sin categoría', 'Asignación automática para productos sin categoría')
+ON DUPLICATE KEY UPDATE descripcion = VALUES(descripcion);
+
 CREATE TABLE proveedores (
     id_proveedor INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
@@ -83,6 +89,26 @@ CREATE TABLE productos (
         ON UPDATE CASCADE
         ON DELETE SET NULL
 ) ENGINE=InnoDB;
+
+-- ProductoDAOImpl envia NULL cuando el usuario no selecciona una categoria.
+-- Antes de validar NOT NULL y la clave foranea, se asigna la categoria de respaldo.
+DELIMITER //
+CREATE TRIGGER trg_productos_categoria_respaldo
+BEFORE INSERT ON productos
+FOR EACH ROW
+BEGIN
+    DECLARE categoria_respaldo INT;
+
+    IF NEW.id_categoria IS NULL THEN
+        SELECT id_categoria INTO categoria_respaldo
+        FROM categorias
+        WHERE nombre = 'Sin categoría'
+        LIMIT 1;
+
+        SET NEW.id_categoria = categoria_respaldo;
+    END IF;
+END//
+DELIMITER ;
 
 CREATE TABLE ventas (
     id_venta INT AUTO_INCREMENT PRIMARY KEY,
