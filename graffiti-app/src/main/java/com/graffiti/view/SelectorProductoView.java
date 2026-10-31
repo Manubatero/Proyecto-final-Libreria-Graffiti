@@ -32,6 +32,12 @@ public final class SelectorProductoView extends VBox {
         busqueda.setPromptText("Buscar producto por nombre o código de barras");
         busqueda.setPrefHeight(40);
         busqueda.textProperty().addListener((o, anterior, actual) -> buscar(actual));
+        busqueda.focusedProperty().addListener((o, anterior, enfocada) -> {
+            if (enfocada) {
+                catalogo = dao.listarTodos();
+                buscar(busqueda.getText());
+            }
+        });
         busqueda.setOnAction(e -> {
             if (!resultados.getChildren().isEmpty()) ((Button) resultados.getChildren().get(0)).fire();
         });
@@ -54,7 +60,7 @@ public final class SelectorProductoView extends VBox {
                     Button opcion = new Button(p.getNombre() + "   ·   $ " + p.getPrecioVenta() + "   ·   Stock " + p.getStockActual());
                     opcion.setMaxWidth(Double.MAX_VALUE);
                     opcion.setAlignment(Pos.CENTER_LEFT);
-                    if (p.getStockActual() != null && p.getStockMinimo() != null && p.getStockActual() < p.getStockMinimo()) {
+                    if (p.getStockActual() != null && p.getStockMinimo() != null && p.getStockActual() <= p.getStockMinimo()) {
                         opcion.setStyle("-fx-text-fill:#fecaca;-fx-background-color:#7f1d1d;-fx-border-color:#ef4444;-fx-border-radius:7;-fx-background-radius:7;");
                         opcion.setText(opcion.getText() + "   ·   ¡STOCK POR DEBAJO DEL MÍNIMO!");
                     }
@@ -71,4 +77,10 @@ public final class SelectorProductoView extends VBox {
     }
 
     public void limpiar() { busqueda.clear(); }
+
+    /** Sincroniza nombres y existencias después de registrar una venta. */
+    public void refrescarCatalogo() {
+        catalogo = dao.listarTodos();
+        buscar(busqueda.getText());
+    }
 }

@@ -1,8 +1,8 @@
 package com.graffiti.view;
 
-import com.graffiti.dao.UsuarioDAO;
-import com.graffiti.dao.impl.UsuarioDAOImpl;
-import com.graffiti.model.Usuario;
+import com.graffiti.dao.VendedorDAO;
+import com.graffiti.dao.impl.VendedorDAOImpl;
+import com.graffiti.model.Vendedor;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 
 /** Panel visual con los datos necesarios para revisar y cobrar una venta. */
 public class ResumenCobroView extends VBox {
-    private final UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
-    private final ComboBox<Usuario> vendedor = new ComboBox<>();
+    private final VendedorDAO vendedorDAO = new VendedorDAOImpl();
+    private final ComboBox<Vendedor> vendedor = new ComboBox<>();
     private final TextField recibido = new TextField();
     private final Label subtotal = new Label("Subtotal                         $ 0,00");
     private final Label total = new Label("TOTAL                              $ 0,00");
@@ -53,14 +53,14 @@ public class ResumenCobroView extends VBox {
         vendedor.setMaxWidth(Double.MAX_VALUE);
         vendedor.setPromptText("Seleccione el vendedor");
         vendedor.setConverter(new StringConverter<>() {
-            public String toString(Usuario u) { return u == null ? "" : u.getNombre() + " " + u.getApellido() + " (" + u.getNombreUsuario() + ")"; }
-            public Usuario fromString(String value) { return null; }
+            public String toString(Vendedor v) { return v == null ? "" : v.getNombre() + " " + v.getApellido(); }
+            public Vendedor fromString(String value) { return null; }
         });
         vendedor.setCellFactory(list -> new ListCell<>() {
-            protected void updateItem(Usuario u, boolean empty) { super.updateItem(u, empty); setText(empty || u == null ? null : u.getNombre() + " " + u.getApellido() + " (" + u.getNombreUsuario() + ")"); }
+            protected void updateItem(Vendedor u, boolean empty) { super.updateItem(u, empty); setText(empty || u == null ? null : u.getNombre() + " " + u.getApellido()); }
         });
         vendedor.setButtonCell(new ListCell<>() {
-            protected void updateItem(Usuario u, boolean empty) { super.updateItem(u, empty); setText(empty || u == null ? null : u.getNombre() + " " + u.getApellido() + " (" + u.getNombreUsuario() + ")"); }
+            protected void updateItem(Vendedor u, boolean empty) { super.updateItem(u, empty); setText(empty || u == null ? null : u.getNombre() + " " + u.getApellido()); }
         });
 
         Label recibidoLabel = new Label("Importe recibido (opcional)");
@@ -105,7 +105,12 @@ public class ResumenCobroView extends VBox {
         actualizarVuelto();
     }
 
-    public Integer getIdVendedor() { return vendedor.getValue() == null ? null : vendedor.getValue().getIdUsuario(); }
+    public Integer getIdVendedor() { return vendedor.getValue() == null ? null : vendedor.getValue().getId(); }
+    public void agregarVendedor(com.graffiti.model.Vendedor nuevo) {
+        vendedor.getItems().setAll(vendedorDAO.listarTodos());
+        vendedor.getSelectionModel().select(vendedor.getItems().stream().filter(v -> v.getId().equals(nuevo.getId())).findFirst().orElse(null));
+        vendedor.setDisable(false);
+    }
     public boolean vendedorDisponible() { return !vendedor.getItems().isEmpty(); }
     public boolean importeRecibidoSuficiente() {
         if (recibido.getText().isBlank()) return true;
@@ -115,7 +120,7 @@ public class ResumenCobroView extends VBox {
     public void limpiar() { recibido.clear(); }
 
     private void cargarVendedores() {
-        vendedor.getItems().setAll(usuarioDAO.listarTodos());
+        vendedor.getItems().setAll(vendedorDAO.listarTodos());
         if (!vendedor.getItems().isEmpty()) vendedor.getSelectionModel().selectFirst();
         else vendedor.setDisable(true);
     }

@@ -8,6 +8,8 @@ public class Venta {
     private LocalDateTime fechaHora;
     private BigDecimal total;
     private Integer idUsuario;
+    private Integer idVendedor;
+    private String nombreVendedor;
 
     public Venta() {}
 
@@ -22,4 +24,9 @@ public class Venta {
 
     public Integer getIdUsuario() { return idUsuario; }
     public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
+
+    public Integer getIdVendedor() { return idVendedor; }
+    public void setIdVendedor(Integer idVendedor) { this.idVendedor = idVendedor; }
+    public String getNombreVendedor() { return nombreVendedor; }
+    public void setNombreVendedor(String nombreVendedor) { this.nombreVendedor = nombreVendedor; }
 }

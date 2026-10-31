@@ -14,8 +14,8 @@ public class VentaDAOImpl implements VentaDAO {
 
     @Override
     public boolean registrarVenta(Venta v, List<DetalleVenta> detalles) {
-        if (v == null || v.getIdUsuario() == null || detalles == null || detalles.isEmpty()) return false;
-        String sqlVenta = "INSERT INTO ventas (fecha_hora, total, id_usuario) VALUES (?, ?, ?)";
+        if (v == null || v.getIdVendedor() == null || detalles == null || detalles.isEmpty()) return false;
+        String sqlVenta = "INSERT INTO ventas (fecha_hora, total, id_usuario, id_vendedor) VALUES (?, ?, ?, ?)";
         String sqlProducto = "SELECT stock_actual, activo, precio_venta FROM productos WHERE id_producto = ? FOR UPDATE";
         String sqlStock = "UPDATE productos SET stock_actual = stock_actual - ? WHERE id_producto = ? AND stock_actual >= ? AND activo = 1";
         String sqlDetalle = "INSERT INTO detalle_venta (id_venta, id_producto, cantidad, precio_unitario, subtotal) VALUES (?, ?, ?, ?, ?)";
@@ -42,7 +42,8 @@ public class VentaDAOImpl implements VentaDAO {
             try (PreparedStatement ps = cn.prepareStatement(sqlVenta, Statement.RETURN_GENERATED_KEYS)) {
                 ps.setTimestamp(1, v.getFechaHora() != null ? Timestamp.valueOf(v.getFechaHora()) : new Timestamp(System.currentTimeMillis()));
                 ps.setBigDecimal(2, total);
-                ps.setInt(3, v.getIdUsuario());
+                if (v.getIdUsuario() == null) ps.setNull(3, Types.INTEGER); else ps.setInt(3, v.getIdUsuario());
+                ps.setInt(4, v.getIdVendedor());
                 ps.executeUpdate();
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (!rs.next()) throw new SQLException("No se pudo obtener el número de venta");
@@ -75,7 +76,7 @@ public class VentaDAOImpl implements VentaDAO {
 
     @Override
     public Venta buscarPorId(int idVenta) {
-        String sql = "SELECT * FROM ventas WHERE id_venta = ?";
+        String sql = "SELECT ve.*, CONCAT(v.nombre, ' ', v.apellido) AS nombre_vendedor FROM ventas ve LEFT JOIN vendedores v ON v.id = ve.id_vendedor WHERE ve.id_venta = ?";
         try (Connection cn = ConexionBD.getConexion();
              PreparedStatement ps = cn.prepareStatement(sql)) {
 
@@ -88,6 +89,8 @@ public class VentaDAOImpl implements VentaDAO {
                     if (ts != null) v.setFechaHora(ts.toLocalDateTime());
                     v.setTotal(rs.getBigDecimal("total"));
                     v.setIdUsuario(rs.getInt("id_usuario"));
+                    v.setIdVendedor(rs.getInt("id_vendedor"));
+                    v.setNombreVendedor(rs.getString("nombre_vendedor"));
                     return v;
                 }
             }
@@ -100,7 +103,7 @@ public class VentaDAOImpl implements VentaDAO {
     @Override
     public List<Venta> listarTodas() {
         List<Venta> lista = new ArrayList<>();
-        String sql = "SELECT * FROM ventas ORDER BY fecha_hora DESC";
+        String sql = "SELECT ve.*, CONCAT(v.nombre, ' ', v.apellido) AS nombre_vendedor FROM ventas ve LEFT JOIN vendedores v ON v.id = ve.id_vendedor ORDER BY ve.fecha_hora DESC";
         try (Connection cn = ConexionBD.getConexion();
              PreparedStatement ps = cn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
@@ -112,6 +115,8 @@ public class VentaDAOImpl implements VentaDAO {
                 if (ts != null) v.setFechaHora(ts.toLocalDateTime());
                 v.setTotal(rs.getBigDecimal("total"));
                 v.setIdUsuario(rs.getInt("id_usuario"));
+                v.setIdVendedor(rs.getInt("id_vendedor"));
+                v.setNombreVendedor(rs.getString("nombre_vendedor"));
                 lista.add(v);
             }
         } catch (SQLException e) {

@@ -33,6 +33,10 @@ public final class DialogoCantidadProducto {
         contenido.setPrefWidth(390);
         dialog.getDialogPane().setContent(contenido);
         dialog.getDialogPane().setStyle("-fx-background-color:#172131;-fx-pref-width:450px;");
+        disponible.setStyle("-fx-text-fill:#cbd5e1;-fx-font-size:14px;");
+        ((Label) contenido.getChildren().get(2)).setStyle("-fx-text-fill:#e2e8f0;-fx-font-size:14px;");
+        ((Button) dialog.getDialogPane().lookupButton(aceptar)).setStyle("-fx-background-color:#0f766e;-fx-text-fill:white;-fx-font-weight:bold;");
+        ((Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL)).setStyle("-fx-background-color:#263548;-fx-text-fill:#e2e8f0;");
         dialog.setResultConverter(b -> {
             if (b != aceptar) return null;
             try { int n = Integer.parseInt(cantidad.getText().trim()); return n >= 1 && n <= maximo ? n : null; }

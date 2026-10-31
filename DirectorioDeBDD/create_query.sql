@@ -59,6 +59,13 @@ CREATE TABLE usuarios (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+CREATE TABLE vendedores (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    INDEX idx_vendedor_apellido_nombre (apellido, nombre)
+) ENGINE=InnoDB;
+
 CREATE TABLE productos (
     id_producto INT AUTO_INCREMENT PRIMARY KEY,
     codigo_barra VARCHAR(50) NOT NULL,
@@ -114,12 +121,18 @@ CREATE TABLE ventas (
     id_venta INT AUTO_INCREMENT PRIMARY KEY,
     fecha_hora DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    id_usuario INT NOT NULL,
+    id_usuario INT NULL,
+    id_vendedor INT NOT NULL,
     CONSTRAINT chk_venta_total CHECK (total >= 0),
     INDEX idx_venta_fecha_hora (fecha_hora),
     INDEX idx_venta_usuario (id_usuario),
+    INDEX idx_venta_vendedor (id_vendedor),
     CONSTRAINT fk_venta_usuario
         FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_venta_vendedor
+        FOREIGN KEY (id_vendedor) REFERENCES vendedores(id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
@@ -146,6 +159,7 @@ CREATE TABLE detalle_venta (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- Orden de entidades: categorias, proveedores, roles, usuarios,
+-- El detalle identifica al vendedor a traves de su venta (detalle_venta.id_venta -> ventas.id_vendedor).
+-- Orden de entidades: categorias, proveedores, roles, usuarios, vendedores,
 -- productos, ventas y detalle_venta.
 -- En instalaciones nuevas, ejecutar este archivo completo una sola vez.

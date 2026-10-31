@@ -27,6 +27,7 @@ public final class PuntoDeVentaModularView extends Tab {
     private final ObservableList<FilaCarrito> carrito = FXCollections.observableArrayList();
     private final TableView<FilaCarrito> tabla = new TableView<>(carrito);
     private final ResumenCobroView resumen = new ResumenCobroView();
+    private SelectorProductoView selectorProductos;
     private final Label estado = new Label("1 · Venta en curso");
 
     public PuntoDeVentaModularView() {
@@ -51,8 +52,14 @@ public final class PuntoDeVentaModularView extends Tab {
         resumen.setAcciones(this::iniciarPago, this::limpiarVenta);
     }
 
+    public void registrarNuevoVendedor() {
+        com.graffiti.model.Vendedor nuevo = DialogoVendedor.mostrar();
+        if (nuevo != null) resumen.agregarVendedor(nuevo);
+    }
+
     private VBox crearPanelCarrito() {
         SelectorProductoView selector = new SelectorProductoView(productos, this::agregarProducto);
+        selectorProductos = selector;
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         tabla.setPlaceholder(new Label("El detalle de la venta aparecerá aquí."));
         tabla.getColumns().setAll(columna("Código", f -> f.producto.getCodigoBarra()),
@@ -134,7 +141,7 @@ public final class PuntoDeVentaModularView extends Tab {
     private void registrarVenta() {
         Venta venta = new Venta();
         venta.setFechaHora(LocalDateTime.now());
-        venta.setIdUsuario(resumen.getIdVendedor());
+        venta.setIdVendedor(resumen.getIdVendedor());
         List<DetalleVenta> detalles = new ArrayList<>();
         for (FilaCarrito fila : carrito) {
             DetalleVenta detalle = new DetalleVenta();
@@ -143,7 +150,9 @@ public final class PuntoDeVentaModularView extends Tab {
             detalle.setPrecioUnitario(fila.producto.getPrecioVenta());
             detalles.add(detalle);
         }
-        if (ventas.registrarVenta(venta, detalles)) {
+        boolean registrada = ventas.registrarVenta(venta, detalles);
+        if (registrada) selectorProductos.refrescarCatalogo();
+        if (registrada) {
             estado.setText("3 · Pagado · Venta #" + venta.getIdVenta());
             Alert ok = new Alert(Alert.AlertType.INFORMATION, "La venta #" + venta.getIdVenta() + " se registró en ventas recientes.", ButtonType.OK);
             ok.setHeaderText("Pago confirmado"); ok.showAndWait();
@@ -155,7 +164,7 @@ public final class PuntoDeVentaModularView extends Tab {
     }
 
     private FilaCarrito buscarFila(Producto p) { return carrito.stream().filter(f -> f.producto.getIdProducto().equals(p.getIdProducto())).findFirst().orElse(null); }
-    private boolean stockBajo(Producto p) { return p.getStockActual() != null && p.getStockMinimo() != null && p.getStockActual() < p.getStockMinimo(); }
+    private boolean stockBajo(Producto p) { return p.getStockActual() != null && p.getStockMinimo() != null && p.getStockActual() <= p.getStockMinimo(); }
     private BigDecimal total() { return carrito.stream().map(FilaCarrito::subtotal).reduce(BigDecimal.ZERO, BigDecimal::add); }
     private void actualizarTotal() { resumen.actualizarImportes(total()); }
     private void limpiarVenta() { carrito.clear(); tabla.refresh(); resumen.limpiar(); actualizarTotal(); estado.setText("1 · Venta en curso"); }

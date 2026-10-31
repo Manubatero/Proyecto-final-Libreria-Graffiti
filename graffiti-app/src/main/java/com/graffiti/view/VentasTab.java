@@ -85,10 +85,14 @@ public class VentasTab extends Tab {
         colUsuario.setCellValueFactory(d -> new SimpleStringProperty(
                 d.getValue().getIdUsuario() != null ? String.valueOf(d.getValue().getIdUsuario()) : "—"));
 
+        TableColumn<Venta, String> colVendedor = new TableColumn<>("Vendedor");
+        colVendedor.setCellValueFactory(d -> new SimpleStringProperty(
+                d.getValue().getNombreVendedor() != null ? d.getValue().getNombreVendedor() : "No disponible"));
+
         TableColumn<Venta, String> colTotal = new TableColumn<>("Total");
         colTotal.setCellValueFactory(d -> new SimpleStringProperty(formatearImporte(d.getValue().getTotal())));
 
-        tablaVentas.getColumns().addAll(colId, colFecha, colUsuario, colTotal);
+        tablaVentas.getColumns().addAll(colId, colFecha, colVendedor, colTotal);
     }
 
     private void cargarVentas() {
@@ -129,7 +133,9 @@ public class VentasTab extends Tab {
         Label total = new Label("Total: " + formatearImporte(venta.getTotal()));
         total.setStyle("-fx-font-size:15px;-fx-font-weight:bold;-fx-text-fill:#e2e8f0;");
 
-        VBox contenido = new VBox(12, encabezado, tablaDetalle, total);
+        Label vendedor = new Label("Vendedor a cargo: " + (venta.getNombreVendedor() == null ? "No disponible" : venta.getNombreVendedor()));
+        vendedor.setStyle("-fx-text-fill:#94a3b8;");
+        VBox contenido = new VBox(12, encabezado, vendedor, tablaDetalle, total);
         contenido.setPadding(new Insets(15));
         VBox.setVgrow(tablaDetalle, Priority.ALWAYS);
 
