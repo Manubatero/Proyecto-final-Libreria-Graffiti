@@ -1,102 +1,68 @@
 package com.graffiti.view;
-
+import com.graffiti.dao.*;
+import com.graffiti.dao.impl.*;
+import com.graffiti.model.*;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.collections.*;
+import javafx.geometry.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.*;
 
-/** Pantalla visual del punto de venta; las operaciones de cobro se integrarán luego con los DAO. */
 public class PuntoDeVentaView extends Tab {
-
-    public PuntoDeVentaView() {
-        super("  Punto de venta  ");
-        setClosable(false);
-
-        BorderPane contenido = new BorderPane();
-        contenido.setPadding(new Insets(22));
-        contenido.setStyle("-fx-background-color:#182230;");
-        contenido.setTop(crearEncabezado());
-        contenido.setCenter(crearAreaVenta());
-        BorderPane.setMargin(contenido.getCenter(), new Insets(18, 0, 0, 0));
-        setContent(contenido);
-    }
-
-    private VBox crearEncabezado() {
-        Label titulo = new Label("Punto de venta");
-        titulo.setStyle("-fx-font-size:24px;-fx-font-weight:bold;-fx-text-fill:#f1f5f9;");
-        Label ayuda = new Label("Escanee el código de barras o busque un producto para iniciar la venta.");
-        ayuda.setStyle("-fx-font-size:13px;-fx-text-fill:#94a3b8;");
-        return new VBox(5, titulo, ayuda);
-    }
-
-    private SplitPane crearAreaVenta() {
-        SplitPane area = new SplitPane(crearPanelCarrito(), new ResumenCobroView());
-        area.setDividerPositions(0.70);
-        area.setStyle("-fx-background-color:transparent;");
-        return area;
-    }
-
-    private VBox crearPanelCarrito() {
-        TextField busqueda = new TextField();
-        busqueda.setPromptText("Código de barras o nombre del producto");
-        busqueda.setPrefHeight(40);
-        busqueda.setStyle("-fx-font-size:14px;-fx-background-radius:7;");
-
-        Button buscar = new Button("Buscar producto");
-        buscar.setPrefHeight(40);
-        buscar.setStyle("-fx-background-color:#1d4ed8;-fx-text-fill:white;-fx-font-weight:bold;-fx-background-radius:7;-fx-padding:0 16;");
-        HBox filaBusqueda = new HBox(10, busqueda, buscar);
-        filaBusqueda.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(busqueda, Priority.ALWAYS);
-
-        Label tituloCarrito = new Label("Detalle de la venta");
-        tituloCarrito.setStyle("-fx-font-size:16px;-fx-font-weight:bold;-fx-text-fill:#e2e8f0;");
-        TableView<FilaCarrito> tabla = crearTablaCarrito();
-        VBox.setVgrow(tabla, Priority.ALWAYS);
-
-        Label ayudaEscaner = new Label("El lector de código de barras puede escribir directamente en el campo de búsqueda.");
-        ayudaEscaner.setWrapText(true);
-        ayudaEscaner.setStyle("-fx-font-size:11px;-fx-text-fill:#64748b;");
-
-        VBox panel = new VBox(14, filaBusqueda, tituloCarrito, tabla, ayudaEscaner);
-        panel.setPadding(new Insets(18));
-        panel.setStyle(estiloTarjeta());
-        return panel;
-    }
-
-    private TableView<FilaCarrito> crearTablaCarrito() {
-        TableView<FilaCarrito> tabla = new TableView<>();
-        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
-        tabla.setPlaceholder(new Label("El detalle de la venta aparecerá aquí."));
-        TableColumn<FilaCarrito, String> codigo = columna("Código", FilaCarrito::getCodigo);
-        TableColumn<FilaCarrito, String> producto = columna("Producto", FilaCarrito::getProducto);
-        TableColumn<FilaCarrito, String> cantidad = columna("Cant.", FilaCarrito::getCantidad);
-        TableColumn<FilaCarrito, String> precio = columna("Precio unitario", FilaCarrito::getPrecio);
-        TableColumn<FilaCarrito, String> subtotal = columna("Subtotal", FilaCarrito::getSubtotal);
-        tabla.getColumns().add(codigo);
-        tabla.getColumns().add(producto);
-        tabla.getColumns().add(cantidad);
-        tabla.getColumns().add(precio);
-        tabla.getColumns().add(subtotal);
-        return tabla;
-    }
-
-    private TableColumn<FilaCarrito, String> columna(String titulo, java.util.function.Function<FilaCarrito, String> valor) {
-        TableColumn<FilaCarrito, String> columna = new TableColumn<>(titulo);
-        columna.setCellValueFactory(fila -> new SimpleStringProperty(valor.apply(fila.getValue())));
-        return columna;
-    }
-
-    static String estiloTarjeta() {
-        return "-fx-background-color:#172131;-fx-background-radius:10;-fx-border-color:#334155;-fx-border-radius:10;";
-    }
-
-    private static class FilaCarrito {
-        private String getCodigo() { return ""; }
-        private String getProducto() { return ""; }
-        private String getCantidad() { return ""; }
-        private String getPrecio() { return ""; }
-        private String getSubtotal() { return ""; }
-    }
+ private final ProductoDAO productos=new ProductoDAOImpl();
+ private final VentaDAO ventas=new VentaDAOImpl();
+ private final ObservableList<Fila> carrito=FXCollections.observableArrayList();
+ private final TableView<Fila> tabla=new TableView<>(carrito);
+ private final TextField busqueda=new TextField();
+ private final ResumenCobroView resumen=new ResumenCobroView();
+ private List<Producto> catalogo=List.of();
+ private final javafx.stage.Popup sugerencias=new javafx.stage.Popup();
+ private final VBox listaSugerencias=new VBox(2);
+ public PuntoDeVentaView(){
+  super("  Punto de cobro  ");setClosable(false);
+  BorderPane root=new BorderPane();root.setPadding(new Insets(22));root.setStyle("-fx-background-color:#182230;");
+  Label title=new Label("Punto de cobro");title.setStyle("-fx-font-size:24px;-fx-font-weight:bold;-fx-text-fill:#f1f5f9;");
+  root.setTop(new VBox(5,title,new Label("Escanee el código de barras o busque un producto para iniciar la venta.")));
+  SplitPane area=new SplitPane(panel(),resumen);area.setDividerPositions(.70);root.setCenter(area);BorderPane.setMargin(area,new Insets(18,0,0,0));
+  setContent(root);resumen.setAcciones(this::cobrar,this::limpiar);
+ }
+ private VBox panel(){
+  busqueda.setPromptText("Código de barras o nombre del producto");busqueda.setPrefHeight(40);
+  Button add=new Button("Agregar producto");add.setOnAction(e->agregar());busqueda.setOnAction(e->agregar());
+  HBox search=new HBox(10,busqueda,add);search.setAlignment(Pos.CENTER_LEFT);HBox.setHgrow(busqueda,Priority.ALWAYS);
+  tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+  tabla.setPlaceholder(new Label("El detalle de la venta aparecerá aquí."));
+  tabla.getColumns().addAll(col("Código",f->f.p.getCodigoBarra()),col("Producto",f->f.p.getNombre()),col("Cant.",f->""+f.cantidad),col("Precio unitario",f->money(f.p.getPrecioVenta())),col("Subtotal",f->money(f.subtotal())));
+  Button quitar=new Button("Quitar seleccionado");quitar.setOnAction(e->{Fila f=tabla.getSelectionModel().getSelectedItem();if(f!=null){carrito.remove(f);total();}});
+  VBox box=new VBox(14,search,new Label("Detalle de la venta"),tabla,quitar,new Label("El lector de barras puede escribir directamente en el campo de búsqueda."));
+  box.setPadding(new Insets(18));box.setStyle(estiloTarjeta());VBox.setVgrow(tabla,Priority.ALWAYS);return box;
+ }
+ private TableColumn<Fila,String> col(String n,java.util.function.Function<Fila,String> val){TableColumn<Fila,String> c=new TableColumn<>(n);c.setCellValueFactory(x->new SimpleStringProperty(val.apply(x.getValue())));return c;}
+ private void agregar(){
+  String q=busqueda.getText().trim();if(q.isEmpty())return;
+  Producto p=productos.buscarPorCodigoBarra(q);
+  if(p==null||!Boolean.TRUE.equals(p.getActivo()))p=productos.listarTodos().stream().filter(x->x.getNombre()!=null&&x.getNombre().toLowerCase().contains(q.toLowerCase())).findFirst().orElse(null);
+  if(p==null||!Boolean.TRUE.equals(p.getActivo())){alert(Alert.AlertType.WARNING,"Producto no encontrado","No existe un producto activo con ese código o nombre.");return;}
+  final int id=p.getIdProducto();Fila f=carrito.stream().filter(x->x.p.getIdProducto().equals(id)).findFirst().orElse(null);
+  if(p.getStockActual()==null||(f==null?0:f.cantidad)>=p.getStockActual()){alert(Alert.AlertType.WARNING,"Stock insuficiente","No hay unidades disponibles para agregar.");return;}
+  if(f==null)carrito.add(new Fila(p));else f.cantidad++;tabla.refresh();total();busqueda.clear();busqueda.requestFocus();
+ }
+ private void cobrar(){
+  if(carrito.isEmpty()){alert(Alert.AlertType.WARNING,"Carrito vacío","Agregue al menos un producto antes de cobrar.");return;}
+  if(resumen.getIdVendedor()==null){alert(Alert.AlertType.ERROR,"Vendedor requerido","No hay un vendedor activo para asociar a la venta.");return;}
+  if(!resumen.importeRecibidoSuficiente()){alert(Alert.AlertType.WARNING,"Importe inválido","Revise el importe recibido; debe cubrir el total.");return;}
+  Venta v=new Venta();v.setFechaHora(LocalDateTime.now());v.setIdUsuario(resumen.getIdVendedor());
+  List<DetalleVenta> ds=new ArrayList<>();for(Fila f:carrito){DetalleVenta d=new DetalleVenta();d.setIdProducto(f.p.getIdProducto());d.setCantidad(f.cantidad);d.setPrecioUnitario(f.p.getPrecioVenta());ds.add(d);}
+  if(ventas.registrarVenta(v,ds)){alert(Alert.AlertType.INFORMATION,"Venta registrada","La venta #"+v.getIdVenta()+" se cobró correctamente.");limpiar();}
+  else alert(Alert.AlertType.ERROR,"No se pudo registrar","La venta no se guardó. Verifique el stock y la conexión con la base de datos.");
+ }
+ private void limpiar(){carrito.clear();tabla.refresh();total();resumen.limpiar();busqueda.clear();}
+ private void total(){resumen.actualizarImportes(carrito.stream().map(Fila::subtotal).reduce(BigDecimal.ZERO,BigDecimal::add));}
+ private void alert(Alert.AlertType t,String title,String msg){Alert a=new Alert(t);a.setTitle(title);a.setHeaderText(null);a.setContentText(msg);a.showAndWait();}
+ private static String money(BigDecimal n){return "$ "+(n==null?"0.00":n.toPlainString());}
+ static String estiloTarjeta(){return "-fx-background-color:#172131;-fx-background-radius:10;-fx-border-color:#334155;-fx-border-radius:10;";}
+ private static class Fila{final Producto p;int cantidad=1;Fila(Producto p){this.p=p;}BigDecimal subtotal(){return p.getPrecioVenta().multiply(BigDecimal.valueOf(cantidad));}}
 }

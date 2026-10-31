@@ -1,7 +1,7 @@
 package com.graffiti;
 
 import com.graffiti.view.InventarioTab;
-import com.graffiti.view.PuntoDeVentaView;
+import com.graffiti.view.PuntoDeVentaModularView;
 import com.graffiti.view.VentasTab;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -19,7 +19,7 @@ public class AppLauncher extends Application {
             InventarioTab inventarioTab = new InventarioTab();
             inventarioTab.setClosable(false);
             tabPane.getTabs().add(inventarioTab);
-            tabPane.getTabs().add(new PuntoDeVentaView());
+            tabPane.getTabs().add(new PuntoDeVentaModularView());
             tabPane.getTabs().add(new VentasTab());
 
             Scene scene = new Scene(tabPane, 1000, 600);
